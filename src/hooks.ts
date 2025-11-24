@@ -3,6 +3,7 @@
 import { DataManager } from './dataGlobals'
 import { Elements } from './modules/create-element'
 import { Logger } from './modules/mdbcLogger'
+import { ObsidianInteractions } from './modules/mdbcObsidian'
 import { ScanMarkdownFiles } from './modules/mdbcScan'
 import { wrappers } from './modules/mdbcStartupHelpers'
 import { Notifier, prefHelpers, Registrar, systemInterface, UIHelpers } from './modules/mdbcUX'
@@ -20,21 +21,12 @@ async function onStartup() {
 
   Registrar.registerPrefs()
 
-  // BasicExampleFactory.registerNotifier()
-
-  // registerPreferenceStyleSheet()
-
-  // await onMainWindowLoad(window)
-
   await Promise.all(Zotero.getMainWindows().map((win) => onMainWindowLoad(win)))
 }
 
 async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
   // Create ztoolkit for every window
   addon.data.ztoolkit = createZToolkit()
-
-  // @ts-ignore This is a moz feature
-  // win.MozXULElement.insertFTLIfNeeded(`${addon.data.config.addonRef}-mainWindow.ftl`)
 
   const popupWin = new ztoolkit.ProgressWindow(addon.data.config.addonName, {
     closeOnClick: true,
@@ -48,14 +40,11 @@ async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
     })
     .show()
 
-  // KeyExampleFactory.registerShortcuts();
-
   popupWin.changeLine({
     progress: 30,
     text: `[30%]  ${getString('startup-syncing')}`,
   })
 
-  // TODO Only run Sync if config check passes.
   await ScanMarkdownFiles.syncWrapper(false, false)
 
   popupWin.changeLine({
@@ -64,18 +53,11 @@ async function onMainWindowLoad(win: _ZoteroTypes.MainWindow): Promise<void> {
   })
 
   UIHelpers.registerWindowMenuItem_Sync()
+  UIHelpers.registerOpenNote()
+
   if (!DataManager.isClean() || DataManager.numberRecords() === 0 || addon.data.env === 'development') {
     UIHelpers.registerWindowMenuItem_Debug()
-  } else {
-    ///WIP
-    // try {
-    //   ztoolkit.Menu.unregister(`${config.addonRef}-tools-menu-troubleshoot`)
-    // } catch (err) {
-    //   Logger.log('toolsmenu', `ERROR: unregister :: ${err}`)
-    // }
   }
-  // register(menuPopup: XUL.MenuPopup | keyof typeof MenuSelector, options: MenuitemOptions, insertPosition?: "before" | "after", anchorElement?: XUL.Element): false | undefined;
-  // unregister(menuId: string): void;
 
   UIHelpers.registerRightClickMenuItem()
 
@@ -109,6 +91,29 @@ function syncMarkDB() {
     })
 }
 
+function openObsidianNote() {
+  ObsidianInteractions.openNoteForItems(Zotero.getActiveZoteroPane().getSelectedItems()).catch((err) => {
+    Logger.log('openObsidianNote', `ERROR :: ${err}`, true, 'error')
+    let alertMessage = 'An unexpected error occurred while trying to open the Obsidian note.'
+    if (err instanceof Error) {
+      alertMessage = err.message
+    } else if (typeof err === 'string') {
+      if (err.includes('Note for item') && err.includes('not found')) {
+        alertMessage = err
+      } else if (err.includes('No items selected')) {
+        alertMessage = 'Please select an item in Zotero first.'
+      } else if (err.includes('More than one item selected')) {
+        alertMessage = 'Please select only one item to open its note.'
+      } else if (err.includes('FAILED')) {
+        alertMessage = 'Could not connect to Obsidian. Please make sure Obsidian is running and the addon preferences are configured correctly.'
+      } else {
+        alertMessage = `An error occurred: ${err}`
+      }
+    }
+    Zotero.alert(Zotero.getMainWindow(), 'MarkDB-Connect', alertMessage)
+  })
+}
+
 function syncMarkDBReport() {
   //// called from tools menu ////
   const displayReport = true
@@ -134,11 +139,6 @@ function syncMarkDBSaveDebug() {
     })
     .catch((err) => {
       Logger.log('syncMarkDBSaveDebug', `ERROR :: ${err}`, true, 'error')
-      // const loggedMessages = Logger.getMessages()
-      // await
-      // ScanMarkdownFiles.displayReportDialog([], loggedMessages)
-      // await
-      // systemInterface.dumpDebuggingLog()
     })
 }
 
@@ -193,16 +193,9 @@ function onShutdown(): void {
   delete Zotero[addon.data.config.addonInstance]
 }
 
-/**
- * This function is just an example of dispatcher for Preference UI events.
- * Any operations should be placed in a function to keep this function clear.
- * @param type event type
- * @param data event data
- */
 async function onPrefsEvent(type: string, data: Record<string, any>) {
   switch (type) {
     case 'load':
-      // await registerPrefsScripts(data.window as Window)
       registerPrefsScripts(data.window)
       break
     case 'chooseVaultFolder':
@@ -225,15 +218,6 @@ async function onPrefsEvent(type: string, data: Record<string, any>) {
   }
 }
 
-// Add your hooks here. For element click, etc.
-// Keep in mind hooks only do dispatch. Don't add code that does real jobs in hooks.
-// Otherwise the code would be hard to read and maintain.
-
-/*
- * E.g.:
- * Zotero.MDBC.hooks.DataStore()
- * Zotero.MDBC.hooks.Logs()
- */
 export default {
   onStartup,
   onShutdown,
@@ -243,6 +227,7 @@ export default {
   syncMarkDB,
   syncMarkDBReport,
   syncMarkDBSaveDebug,
+  openObsidianNote,
   Logs,
   DataStore,
   Data,

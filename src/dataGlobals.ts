@@ -29,6 +29,10 @@ export class DataManager {
     return DataStore.zotIds.includes(itemId)
   }
 
+  static getNotesForItem(itemId: number): Entry[] {
+    return DataStore.data[itemId.toString()] || []
+  }
+
   static getEntryList(itemId: number): Entry[] {
     return DataStore.data[itemId.toString()]
   }

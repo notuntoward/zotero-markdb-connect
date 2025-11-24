@@ -344,6 +344,77 @@ export class getParam {
   }
 
   @trace
+  static obsidianRestApiPort() {
+    ///TYPE: string
+    const name = 'obsidianRestApiPort'
+    const valueDefault = '27123'
+    let value = valueDefault
+    let verified = false
+    let valid = true
+    let msg: string[] = []
+
+    const valueRaw = getPref(name)
+    msg.push(`pref value: >>${valueRaw}<<.`)
+
+    if (valueRaw && typeof valueRaw === 'string' && valueRaw.length > 0) {
+      verified = true
+      valid = true
+      value = valueRaw
+    }
+
+    if (verified) {
+      msg.push('value passed verification checks.')
+    } else {
+      msg.push('value FAILED verification checks.')
+      if (valueRaw !== '' && valueRaw !== valueDefault) {
+        msg.push('pref overwritten with default.')
+        Logger.log(
+          'getParam',
+          `ERROR: ${name}: invalid value :: >>${valueRaw}<<. Using default >>${valueDefault}<< instead.`,
+          false,
+          'error',
+        )
+        Logger.log('getParam', `${name}: set to default :: >>${valueDefault}<<`, false, 'error')
+        setPref(name, valueDefault)
+      }
+    }
+
+    const param = { name, value, valid, msg: msg.join(' ') }
+    Logger.log(name, param, false, 'config')
+    return param
+  }
+
+  @trace
+  static obsidianRestApiKey() {
+    ///TYPE: string
+    const name = 'obsidianRestApiKey'
+    const valueDefault = ''
+    let value = valueDefault
+    let verified = false
+    let valid = true // It's a valid state to have no API key
+    let msg: string[] = []
+
+    const valueRaw = getPref(name)
+    msg.push(`pref value: >>${valueRaw ? '********' : ''}<<.`)
+
+    if (valueRaw && typeof valueRaw === 'string') {
+      verified = true
+      value = valueRaw
+    }
+    
+    if (verified) {
+      msg.push('value is present.')
+    } else {
+      msg.push('value is not present.')
+    }
+
+    const param = { name, value, valid, msg: msg.join(' ') }
+    // Do not log the key itself
+    Logger.log(name, { name, value: value ? '********' : '', valid }, false, 'config')
+    return param
+  }
+
+  @trace
   static logseqgraph() {
     ///TYPE: string
     const name = 'logseqgraph'

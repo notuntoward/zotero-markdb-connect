@@ -18,6 +18,8 @@ pref('zotkeyregexp', '')
 
 pref('mdeditor', 'obsidian') // ['obsidian', 'logseq', 'system'][0]
 pref('obsidianvaultname', '')
+pref('obsidianRestApiPort', '27123')
+pref('obsidianRestApiKey', '')
 // pref('obsidianresolvewithfile', false) // [false, true][0]
 pref('obsidianresolvespec', 'path') // ['path', 'file'][0]
 
