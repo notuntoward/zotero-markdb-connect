@@ -19,6 +19,8 @@ declare namespace _ZoteroTypes {
       "zotkeyregexp": string;
       "mdeditor": string;
       "obsidianvaultname": string;
+      "obsidianRestApiPort": string;
+      "obsidianRestApiKey": string;
       "obsidianresolvespec": string;
       "logseqgraph": string;
       "logseqprefix": string;

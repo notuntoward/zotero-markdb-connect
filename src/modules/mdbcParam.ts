@@ -404,7 +404,7 @@ export class getParam {
     }
 
     const param = { name, value, valid, msg: msg.join(' ') }
-    Logger.log(name, param, false, 'config')
+    Logger..log(name, param, false, 'config')
     return param
   }
 

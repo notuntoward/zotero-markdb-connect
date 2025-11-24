@@ -1,36 +1,4 @@
-### Local config files ###
-
-
-# dot files
-.DS_Store
-
-### Runtime ###
 node_modules/
-
-dist/
-
-yarn.lock
-.DS_Store
-
-### Editor directories and files ###
-.vscode/
-# .idea/
-
-### Generated files ###
-eslint.config.js
-
-# Node.js
-node_modules
-pnpm-lock.yaml
-yarn.lock
-
-# TSC
-tsconfig.tsbuildinfo
-
-# Scaffold
-.env
-.scaffold/
 build/
-logs/
-
-VSCProject.code-workspace
+dist/
+*.xpi

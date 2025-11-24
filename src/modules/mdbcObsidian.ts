@@ -1,4 +1,3 @@
-import { config } from '../../package.json';
 import { DataManager } from '../dataGlobals';
 import { getParam } from './mdbcParam';
 import { Logger } from './mdbcLogger';
@@ -9,18 +8,22 @@ export class ObsidianInteractions {
     const pluginsDir = `${vaultPath}/.obsidian/plugins`;
     const communityPluginsFile = `${vaultPath}/.obsidian/community-plugins.json`;
 
-    const pluginDirExists = await Zotero.File.exists(`${pluginsDir}/${pluginId}`);
+    const pluginDirExists = Zotero.File.pathToFile(`${pluginsDir}/${pluginId}`).exists();
     if (!pluginDirExists) {
       return [false, false];
     }
 
-    const communityPluginsFileExists = await Zotero.File.exists(communityPluginsFile);
+    const communityPluginsFileExists = Zotero.File.pathToFile(communityPluginsFile).exists();
     if (!communityPluginsFileExists) {
       return [true, false];
     }
 
     try {
-      const enabledPlugins = JSON.parse(await Zotero.File.getContentsAsync(communityPluginsFile));
+      const contents = await Zotero.File.getContentsAsync(communityPluginsFile);
+      if (!contents) {
+        return [true, false];
+      }
+      const enabledPlugins = JSON.parse(contents.toString());
       const isEnabled = enabledPlugins.includes(pluginId);
       return [true, isEnabled];
     } catch (e) {
@@ -76,43 +79,45 @@ export class ObsidianInteractions {
     if (!items || items.length === 0) {
       throw new Error('No items selected.');
     }
-    if (items.length > 1) {
-      throw new Error('More than one item selected. Please select only one item to open its note.');
-    }
-    const item = items[0];
-    const notes = DataManager.getNotesForItem(item.id);
 
-    if (notes.length === 0) {
-      throw new Error(`Note for item "${item.getField('title')}" not found.`);
-    }
+    for (const item of items) {
+        const notes = DataManager.getNotesForItem(item.id);
 
-    const notePath = notes[0].path;
-    const interactionMode = getParam.obsidianInteractionMode().value;
-    const vaultPath = getParam.sourcedir().value;
-    const vaultName = getParam.obsidianvaultname().value || vaultPath.split('/').pop().split('\\').pop();
-
-    if (!vaultName) {
-      throw new Error('Obsidian vault name is not configured.');
-    }
-
-    switch (interactionMode) {
-      case 'advancedUri':
-        const [isInstalled, isEnabled] = await this.checkAdvancedUriPlugin(vaultPath);
-        if (isInstalled && isEnabled) {
-          await this.openWithAdvancedUri(notePath, vaultName);
-        } else {
-          this.openWithStandardUri(notePath, vaultName);
+        if (notes.length === 0) {
+          Logger.log('openNoteForItems', `Note for item "${item.getField('title')}" not found.`, true, 'warn');
+          continue;
         }
-        break;
-      case 'restApi':
-        const port = getParam.obsidianRestApiPort().value;
-        const apiKey = getParam.obsidianRestApiKey().value;
-        await this.openWithRestApi(notePath, port, apiKey);
-        break;
-      case 'standard':
-      default:
-        this.openWithStandardUri(notePath, vaultName);
-        break;
+
+        for (const note of notes) {
+            const notePath = note.path;
+            const interactionMode = getParam.obsidianInteractionMode().value;
+            const vaultPath = getParam.sourcedir().value;
+            const vaultName = getParam.obsidianvaultname().value || (vaultPath ? vaultPath.split('/').pop()?.split('\\').pop() : undefined);
+
+            if (!vaultName) {
+              throw new Error('Obsidian vault name is not configured.');
+            }
+
+            switch (interactionMode) {
+              case 'advancedUri':
+                const [isInstalled, isEnabled] = await ObsidianInteractions.checkAdvancedUriPlugin(vaultPath);
+                if (isInstalled && isEnabled) {
+                  await ObsidianInteractions.openWithAdvancedUri(notePath, vaultName);
+                } else {
+                  ObsidianInteractions.openWithStandardUri(notePath, vaultName);
+                }
+                break;
+              case 'restApi':
+                const port = getParam.obsidianRestApiPort().value;
+                const apiKey = getParam.obsidianRestApiKey().value;
+                await ObsidianInteractions.openWithRestApi(notePath, port, apiKey);
+                break;
+              case 'standard':
+              default:
+                ObsidianInteractions.openWithStandardUri(notePath, vaultName);
+                break;
+            }
+        }
     }
   }
 }

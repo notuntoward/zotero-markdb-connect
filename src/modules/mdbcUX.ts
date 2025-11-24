@@ -195,14 +195,14 @@ export class UIHelpers {
             oncommand: `Zotero.${config.addonInstance}.hooks.openObsidianNote();`,
         });
 
-        ztoolkit.Shortcuts.register('keydown', {
-            id: `${config.addonRef}-shortcut-open-note`,
-            key: 'O',
-            modifiers: {
+        new ztoolkit.Shortcuts('keydown').register(
+            `${config.addonRef}-shortcut-open-note`,
+            'O',
+            {
                 ctrl: true,
             },
-            oncommand: `Zotero.${config.addonInstance}.hooks.openObsidianNote();`,
-        });
+            `Zotero.${config.addonInstance}.hooks.openObsidianNote();`,
+        );
     }
 
   @trace
@@ -221,7 +221,7 @@ export class UIHelpers {
       Zotero.getActiveZoteroPane(),
       'buildItemContextMenu',
       (original) =>
-        async function ZoteroPane_buildItemContextMenu() {
+        async function ZoteroPane_buildItemContextMenu(this: any) {
           // @ts-ignore
           await original.apply(this, arguments)
 
