@@ -37,23 +37,31 @@ export class ObsidianInteractions {
   }
 
   private static async openWithRestApi(notePath: string, port: string, apiKey: string): Promise<void> {
-    const url = `http://127.0.0.1:${port}/open-note`;
-    const params = {
-      file: notePath,
-      key: apiKey,
-    };
-    const queryString = Object.entries(params)
-      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
-      .join('&');
+    const API_TIMEOUT_SECS = 5;
+    const url = `http://127.0.0.1:${port}/open`;
 
     try {
-      const response = await Zotero.HTTP.request('GET', `${url}?${queryString}`);
-      if (response.status !== 200) {
-        throw new Error(`Obsidian API returned status ${response.status}`);
+      await Zotero.HTTP.request('POST', url, {
+        body: JSON.stringify({ path: notePath }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`,
+        },
+        timeout: API_TIMEOUT_SECS * 1000,
+      });
+    } catch (err: any) {
+      let errorMessage: string;
+      if (err.message === 'timeout') {
+        errorMessage = `The Obsidian Local REST API did not respond within ${API_TIMEOUT_SECS} seconds. Is Obsidian running and the plugin enabled?`;
+      } else if (err.status === 401 || err.status === 403) {
+        errorMessage = 'Authentication error with Obsidian Local REST API. Is the API key correct?';
+      } else if (err.status) {
+        errorMessage = `Obsidian Local REST API returned an error (status ${err.status}).`;
+      } else {
+        errorMessage = 'Failed to connect to Obsidian Local REST API. Is Obsidian running and is the port correct?';
       }
-    } catch (e) {
-      Logger.log('openWithRestApi', `Error opening note with REST API: ${e}`, true, 'error');
-      throw new Error('FAILED to open note with Obsidian REST API. Is Obsidian running and the API key correct?');
+      Logger.log('openWithRestApi', `Error: ${errorMessage}\nOriginal error: ${err.message}`, true, 'error');
+      throw new Error(errorMessage);
     }
   }
 
@@ -84,7 +92,7 @@ export class ObsidianInteractions {
     const vaultName = getParam.obsidianvaultname().value || vaultPath.split('/').pop().split('\\').pop();
 
     if (!vaultName) {
-        throw new Error('Obsidian vault name is not configured.');
+      throw new Error('Obsidian vault name is not configured.');
     }
 
     switch (interactionMode) {

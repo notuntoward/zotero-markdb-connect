@@ -1,7 +1,7 @@
 <!--https://www.oreilly.com/library/view/creating-applications-with/9780596000523/07_chapter-03.html-->
 <!-- Three tags available in XUL handle basic text display in the UI, and each has its own context for use. They include a <caption>, a <label>, and a <description> element. -->
 <!-- The caption is designed specifically for the text that appears inline in the border of a group box. You can control where the caption appears by putting the caption element above or below the other content in the group box: -->
-<!-- label is more flexible than caption because it isn'''t tied to a particular widget and can even be used as a standalone. -->
+<!-- label is more flexible than caption because it isn't tied to a particular widget and can even be used as a standalone. -->
 <!-- For longer text, the <description> element is best. You can embed text in the description element and have it wrap to the maximum size of the containing element: -->
 
 <linkset>
@@ -100,7 +100,7 @@
             id="zotero-prefpane-__addonRef__-filepattern"
             preference="filepattern"
             class="mdbc-pref-textbox-partialwidth"
-            onchange="return Zotero.__addonInstance__.hooks.onPrefsEvent('checkRegExpValid', {value: this.value})" /><html:span class="mdbc-pref-options-span-right mdbc-pref-options-code-span"
+            onchange="return Zotero.__addonInstance__.hooks.onPrefsEvent('checkRegExpValid\', {value: this.value})" /><html:span class="mdbc-pref-options-span-right mdbc-pref-options-code-span"
             ><html:code>/i</html:code></html:span
           >
         </hbox>
@@ -109,8 +109,8 @@
         <description class="mdbc-pref-description-indent"
           >E.g. the default RegExp filters for MarkDown files that begin with <html:code>@</html:code> and attempts to use the subsequent non-whitespace characters as the BBT citekey:</description
         >
-        <description class="mdbc-pref-description-indent"><html:code class="mdbc-pref-code-indent">/^@(\S+).*\.md$/i</html:code></description>
-        <!--<description class="mdbc-pref-description-indent">E.g. to simply filter for MarkDown files beginning with <html:code>@</html:code>: <html:code>/^@.+\.md$/i</html:code></description>-->
+        <description class="mdbc-pref-description-indent"><html:code class="mdbc-pref-code-indent">/^@(\S+).*\\.md$/i</html:code></description>
+        <!--<description class="mdbc-pref-description-indent">E.g. to simply filter for MarkDown files beginning with <html:code>@</html:code>: <html:code>/^@.+\\.md$/i</html:code></description>-->
       </html:div>
     </radiogroup>
   </groupbox>
@@ -152,7 +152,7 @@
               onchange="Zotero.__addonInstance__.hooks.onPrefsEvent('checkMetadataFormat', {value: this.value})" /><html:span class="mdbc-pref-options-span-right"> </html:span>
           </hbox>
           <description class="mdbc-pref-description-indent"
-            >If you want to extract the citekey from a markdown note'''s metadata, indicate the keyword here. A common value is: '<html:code>citekey</html:code>'.</description
+            >If you want to extract the citekey from a markdown note's metadata, indicate the keyword here. A common value is: '<html:code>citekey</html:code>'.</description
           >
           <description class="mdbc-pref-description-indent">If the specified keyword is not found in the YAML header, MDBC will fallback to searching the filename for a BBT citekey.</description>
           <description class="mdbc-pref-description-indent">If no YAML keyword is given, the citekey will be taken from the filename. </description>
@@ -189,7 +189,7 @@
             >
           </hbox>
           <description class="mdbc-pref-description-indent"
-            >If you want to extract the citekey from a markdown file'''s contents, specify a RegExp with one capturing group here. It should return exactly one match per file.</description
+            >If you want to extract the citekey from a markdown file's contents, specify a RegExp with one capturing group here. It should return exactly one match per file.</description
           >
           <description class="mdbc-pref-description-indent"
             >If more than one match is returned only the first will be used. If the RegExp does not return any matches, MDBC will fallback to searching the filename for a BBT citekey.</description
@@ -211,7 +211,7 @@
         <html:div
           class="mdbc-pref-options-div"
           id="zotero-prefpane-__addonRef__-matchstrategy-zotid-options">
-          <label>__addonName__ will search for a Zotero-Item-Key in the note'''s contents.</label>
+          <label>__addonName__ will search for a Zotero-Item-Key in the note's contents.</label>
 
           <!--<separator />-->
 
@@ -278,26 +278,43 @@
           <separator />
 
           <groupbox>
-            <description>For faster note opening, you can enable the Obsidian Local REST API plugin.</description>
-            <hbox class="mdbc-pref-hbox-indent">
-                <html:span class="mdbc-pref-options-span-first">API Port:</html:span>
-                <html:input
-                      type="text"
-                      id="zotero-prefpane-__addonRef__-obsidianRestApiPort"
-                      preference="obsidianRestApiPort"
-                      class="mdbc-pref-textbox-partialwidth" />
-                <html:span class="mdbc-pref-options-span-right"> </html:span>
-            </hbox>
-            <hbox class="mdbc-pref-hbox-indent">
-                <html:span class="mdbc-pref-options-span-first">API Key:</html:span>
-                <html:input
-                      type="password"
-                      id="zotero-prefpane-__addonRef__-obsidianRestApiKey"
-                      preference="obsidianRestApiKey"
-                      class="mdbc-pref-textbox-partialwidth" />
-                <html:span class="mdbc-pref-options-span-right"> </html:span>
-            </hbox>
+            <description>Select how to interact with Obsidian:</description>
+            <radiogroup id="zotero-prefpane-__addonRef__-obsidianInteractionMode" preference="obsidianInteractionMode">
+              <radio value="standard" label="Standard URI (default)" oncommand="document.getElementById('zotero-prefpane-__addonRef__-obsidian-advanced-uri-options').setAttribute('style', 'opacity: 30%;'); document.getElementById('zotero-prefpane-__addonRef__-obsidian-rest-api-options').setAttribute('style', 'opacity: 30%;');" />
+              <radio value="advancedUri" label="Advanced URI Plugin" oncommand="document.getElementById('zotero-prefpane-__addonRef__-obsidian-advanced-uri-options').setAttribute('style', 'opacity: 100%;'); document.getElementById('zotero-prefpane-__addonRef__-obsidian-rest-api-options').setAttribute('style', 'opacity: 30%;');" />
+              <radio value="restApi" label="Local REST API Plugin" oncommand="document.getElementById('zotero-prefpane-__addonRef__-obsidian-advanced-uri-options').setAttribute('style', 'opacity: 30%;'); document.getElementById('zotero-prefpane-__addonRef__-obsidian-rest-api-options').setAttribute('style', 'opacity: 100%;');" />
+            </radiogroup>
           </groupbox>
+
+          <html:div id="zotero-prefpane-__addonRef__-obsidian-rest-api-options" style="opacity: 30%;">
+            <groupbox>
+              <description>For faster note opening, you can enable the Obsidian Local REST API plugin.</description>
+              <hbox class="mdbc-pref-hbox-indent">
+                  <html:span class="mdbc-pref-options-span-first">API Port:</html:span>
+                  <html:input
+                        type="text"
+                        id="zotero-prefpane-__addonRef__-obsidianRestApiPort"
+                        preference="obsidianRestApiPort"
+                        class="mdbc-pref-textbox-partialwidth" />
+                  <html:span class="mdbc-pref-options-span-right"> </html:span>
+              </hbox>
+              <hbox class="mdbc-pref-hbox-indent">
+                  <html:span class="mdbc-pref-options-span-first">API Key:</html:span>
+                  <html:input
+                        type="password"
+                        id="zotero-prefpane-__addonRef__-obsidianRestApiKey"
+                        preference="obsidianRestApiKey"
+                        class="mdbc-pref-textbox-partialwidth" />
+                  <html:span class="mdbc-pref-options-span-right"> </html:span>
+              </hbox>
+            </groupbox>
+          </html:div>
+
+          <html:div id="zotero-prefpane-__addonRef__-obsidian-advanced-uri-options" style="opacity: 30%;">
+            <groupbox>
+              <description>For opening notes in a new pane, you can enable the Obsidian Advanced URI plugin.</description>
+            </groupbox>
+          </html:div>
 
           <separator />
 
@@ -384,7 +401,7 @@
         <radio
           id="zotero-prefpane-__addonRef__-mdeditor-system"
           value="system"
-          label="System'''s Default Editor"
+          label="System's Default Editor"
           class="mdbc-pref-radio-main"
           oncommand="document.getElementById('zotero-prefpane-__addonRef__-mdeditor-obsidian-options').setAttribute('style', 'opacity: 30%;'); document.getElementById('zotero-prefpane-__addonRef__-mdeditor-logseq-options').setAttribute('style', 'opacity: 30%;'); document.getElementById('zotero-prefpane-__addonRef__-mdeditor-system-options').setAttribute('style', 'opacity: 100%;');" />
 
@@ -479,7 +496,7 @@
     <label class="mdbc-pref-subsection-title">Save Debugging Log</label>
     <html:div class="mdbc-pref-options-div">
       <groupbox>
-        <description>If you'''re encountering errors, you can generate a debugging file to examine yourself and/or to include in a GitHub issue.</description>
+        <description>If you're encountering errors, you can generate a debugging file to examine yourself and/or to include in a GitHub issue.</description>
         <button
           id="zotero-prefpane-__addonRef__-rundebug-button"
           label="Generate Debugging File"
@@ -509,7 +526,7 @@
     <html:div class="mdbc-pref-options-div">
       <groupbox>
         <description
-          >This changes what message are stored in the __addonName__ logger. It doesn'''t affect the exported Debugging File. Leave this at "Minimal" unless you are developing the addon.</description
+          >This changes what message are stored in the __addonName__ logger. It doesn't affect the exported Debugging File. Leave this at "Minimal" unless you are developing the addon.</description
         >
         <groupbox>
           <hbox>

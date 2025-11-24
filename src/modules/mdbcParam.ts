@@ -278,6 +278,30 @@ export class getParam {
   }
 
   @trace
+  static obsidianInteractionMode() {
+    ///TYPE: enum
+    const name: ParamKey = 'obsidianInteractionMode'
+    const valueDefault = paramVals[name][0]
+    let valid = true
+
+    const valueRaw = getPref(name)
+
+    const valueVerified = paramVals[name].find((validName) => validName === valueRaw)
+    const value: ParamValue<'obsidianInteractionMode'> = valueVerified ? valueVerified : valueDefault
+    const param = { name, value, valid }
+
+    if (valueVerified) {
+    } else {
+      Logger.log('getParam', `ERROR: ${name}: invalid value :: ${valueRaw}`, false, 'error')
+      Logger.log('getParam', `${name}: set to default :: ${valueDefault}`, false, 'error')
+      setPref(name, valueDefault)
+    }
+
+    Logger.log(name, param, false, 'config')
+    return param
+  }
+
+  @trace
   static obsidianresolve() {
     ///TYPE: enum
     const name: ParamKey = 'obsidianresolvespec'
